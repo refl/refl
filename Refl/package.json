@@ -1,0 +1,16 @@
+{
+  "name": "Refl",
+  "version": "0.0.1",
+  "description": "Experimental web framework",
+  "scripts": {
+    "test": "mocha --harmony --recursive tests"
+  },
+  "dependencies": {
+    "lodash": "^4.11.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5",
+    "sinon": "^1.17.3"
+  }
+}

@@ -29,19 +29,33 @@ describe('Scope specs', () => {
     })
   })
 
-  describe('nest', () => {
-    it('inherits parent prefix', () => {
+  describe('nest (group)', () => {
+    it('inherits parent prefix', (done) => {
       let scope = new Scope()
       scope.prefix('/foo')
       scope.nest(scope => {
         scope.prefix('/bar')
-        expect(scope.prefix()).to.eq('/foo/bar')
+          expect(scope.prefix()).to.eq('/foo/bar')
+        done()
+      })
+    })
+    
+    it('inherits parent + parents parent prefix (cascading)', (done) => {
+      let scope = new Scope()
+      scope.prefix('/foo')
+      scope.group(scope => {
+        scope.prefix('/bar')
+        scope.group(scope => {
+          scope.prefix('/qux')
+          expect(scope.prefix()).to.eq('/foo/bar/qux')
+          done()
+        })
       })
     })
 
-    it('inherits parent + parents parent prefix (cascading)')
+    it('inherits parent pipeline', (done) => {
+    })
 
-    it('inherits parent pipeline')
     it('inherits parent + parents parent pipeline (cascading)')
   })
 })

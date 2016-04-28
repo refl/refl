@@ -15,10 +15,10 @@ describe('Scope specs', () => {
     beforeEach(() => { scope = new Scope() })
 
     it('specifies a prefix to the scope', () => {
-      expect(scope.getPrefix()).to.eq('')
+      expect(scope.prefix()).to.eq('')
       expect(scope.hasPrefix()).to.be.false
       scope.prefix('/something')
-      expect(scope.getPrefix()).to.eq('/something')
+      expect(scope.prefix()).to.eq('/something')
       expect(scope.hasPrefix()).to.be.true
     })
 
@@ -27,11 +27,21 @@ describe('Scope specs', () => {
       expect(bindPrefix).not.to.throw(/already specified/)
       expect(bindPrefix).to.throw(/already specified/)
     })
-
-    it('inherits parent scope prefix if nested')
   })
 
-  describe('pipeline', () => {
-    it('inherits parent scope pipeline if nested')
+  describe('nest', () => {
+    it('inherits parent prefix', () => {
+      let scope = new Scope()
+      scope.prefix('/foo')
+      scope.nest(scope => {
+        scope.prefix('/bar')
+        expect(scope.prefix()).to.eq('/foo/bar')
+      })
+    })
+
+    it('inherits parent + parents parent prefix (cascading)')
+
+    it('inherits parent pipeline')
+    it('inherits parent + parents parent pipeline (cascading)')
   })
 })

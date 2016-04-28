@@ -6,19 +6,31 @@ class Scope {
     this._pipelines = []
   }
 
+  /*
+  ** Getter and setter for the scope's prefix. If called with an argument the
+  ** prefix is assigned. If called without an argument the current prefix
+  ** is returned. For example:
+  ** ```
+  ** let scope = new Scope();
+  ** scope.prefix("/foo");
+  ** console.log(scope.prefix()); // # => "/foo"
+  ** ```
+  */
   prefix(str) {
+    if(!str) return this._prefix
     if(this._prefix !== '') {
       throw new Error("scope prefix already specified: " + this._prefix)
     }
     this._prefix = str
   }
 
-  getPrefix() {
-    return this._prefix
+  hasPrefix() {
+    return this.prefix() !== ''
   }
 
-  hasPrefix() {
-    return this.getPrefix() !== ''
+  nest(callback) {
+    let nestedScope = new Scope()
+    nestedScope.prefix(this.prefix())
   }
 }
 

@@ -24,6 +24,16 @@ describe('Router specs', () => {
       let fn = () => { router.pipeline("sample", [10]) }
       expect(fn).to.throw(/invalid/)
     })
+
+    it('finds existing pipelines by name', () => {
+      router.pipeline("sample", [])
+      expect(router.pipeline("sample").name).to.eql("sample")
+      expect(router.pipeline("sample").steps).to.eql([])
+    })
+
+    it('returns null if pipeline could not be found', () => {
+      expect(router.pipeline("sample")).to.be.undefined
+    })
   })
 
   describe('scope', () => {

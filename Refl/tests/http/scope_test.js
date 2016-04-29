@@ -2,6 +2,7 @@
 
 const expect = require('chai').expect
 const Scope = require('../../src/http/scope').Scope
+const Router = require('../../src/http/router').Router
 
 describe('Scope specs', () => {
   it('is a function class', () => {
@@ -53,7 +54,29 @@ describe('Scope specs', () => {
       })
     })
 
-    it('inherits parent pipeline', (done) => {
+    it('throws an error if the scope doesnt have a router', () => {
+      let createScope = () => {
+        let scope = new Scope()
+        scope.pipeThrough('web')
+      }
+      expect(createScope).to.throw(/router/)
+    })
+
+    it('throws an error if the router doesnt have the given pipeline', () => {
+      let router = new Router()
+      let scope = new Scope(router)
+      let fn = () => { scope.pipeThrough('web') }
+      expect(fn).to.throw(/not found/)
+    })
+
+    it('inherits parent pipeline', () => {
+      let router = new Router()
+      router.pipeline('web', [])
+      let scope = new Scope(router)
+      scope.pipeThrough('web')
+      scope.nest(scope => {
+      })
+      expect(scope.pipesThrough()).to.eql(['web'])
     })
 
     it('inherits parent + parents parent pipeline (cascading)')

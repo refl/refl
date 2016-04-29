@@ -19,6 +19,9 @@ class Router extends EventEmitter {
   ** Creates a new middleware with the given name and steps
   */
   pipeline(name, steps) {
+    if(!steps) {
+      return this.pipelines[name]
+    }
     let pipeline = new Pipeline(name, steps)
     if(this.hasPipeline(name)) {
       throw new Error("pipeline already registered: " + name)

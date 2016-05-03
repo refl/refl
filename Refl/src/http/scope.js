@@ -33,6 +33,9 @@ class Scope {
   nest(callback) {
     let nestedScope = new Scope(this._router)
     nestedScope._inheritedPrefix = this.prefix()
+    this.pipesThrough().forEach(pipeline => {
+      nestedScope.pipeThrough(pipeline)
+    })
     callback(nestedScope)
   }
   group(callback) { return this.nest(callback) }
@@ -58,6 +61,29 @@ class Scope {
   */
   pipesThrough() {
     return this._pipelines.map(pipeline => { return pipeline.name })
+  }
+
+  match(method, path, handler) {
+  }
+
+  get(path, handler) {
+    return this.match('GET', path, handler)
+  }
+
+  post(path, handler) {
+    return this.match('POST', path, handler)
+  }
+
+  put(path, handler) {
+    return this.match('PUT', path, handler)
+  }
+
+  patch(path, handler) {
+    return this.match('PATCH', path, handler)
+  }
+
+  delete(path, handler) {
+    return this.match('DELETE', path, handler)
   }
 }
 

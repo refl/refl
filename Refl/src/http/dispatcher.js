@@ -61,7 +61,7 @@ class Dispatcher extends EventEmitter {
       handler: handler,
       originalPath: path,
       matcher: matcher,
-      namedParams: namedParams,
+      namedParams: namedParams
     })
   }
 
@@ -71,7 +71,7 @@ class Dispatcher extends EventEmitter {
       lastMatch = path.match(route.matcher)
       return route.method === method && lastMatch
     })
-    if(route) {
+    if(route && lastMatch) {
       let params = {}
       if(lastMatch.length > 1) {
         route.namedParams.forEach((param, index) => {

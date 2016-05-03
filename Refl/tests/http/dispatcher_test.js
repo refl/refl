@@ -58,9 +58,10 @@ describe('Dispatcher specs', () => {
       dispatcher.dispatch('GET', '/users/10')
     })
 
-    it('calls the handler with multiple params', () => {
+    it('calls the handler with multiple params', (done) => {
       let handler = (params) => {
         expect(params).to.eql({ user_id: '10', comment_id: '15' })
+        done()
       }
       dispatcher.register('GET', '/users/:user_id/comments/:comment_id', handler)
       dispatcher.dispatch('GET', '/users/10/comments/15')

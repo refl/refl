@@ -69,16 +69,52 @@ describe('Scope specs', () => {
       expect(fn).to.throw(/not found/)
     })
 
-    it('inherits parent pipeline', () => {
+    it('inherits parent pipeline', (done) => {
       let router = new Router()
       router.pipeline('web', [])
+      router.pipeline('some', [])
       let scope = new Scope(router)
       scope.pipeThrough('web')
       scope.nest(scope => {
+        scope.pipeThrough('some')
+        expect(scope.pipesThrough()).to.eql(['web', 'some'])
+        done()
       })
-      expect(scope.pipesThrough()).to.eql(['web'])
     })
 
-    it('inherits parent + parents parent pipeline (cascading)')
+    it('inherits parent + parents parent pipeline (cascading)', (done) => {
+      let router = new Router()
+      router.pipeline('web', [])
+      router.pipeline('dog', [])
+      router.pipeline('cat', [])
+      let scope = new Scope(router)
+      scope.pipeThrough('web')
+      scope.nest(scope => {
+        scope.pipeThrough('dog')
+        scope.nest(scope => {
+          scope.pipeThrough('cat')
+          expect(scope.pipesThrough()).to.eql(['web', 'dog', 'cat'])
+          done()
+        })
+      })
+    })
+  })
+
+  describe('routing', () => {
+    let scope, router
+    beforeEach(() => {
+      router = new Router()
+      scope = new Scope(router)
+    })
+
+    it('registers a GET route', () => {
+      scope.get('/home', conn => {
+      })
+    })
+
+    it('registers a POST route')
+    it('registers a PUT route')
+    it('registers a PATCH route')
+    it('registers a DELETE route')
   })
 })

@@ -43,10 +43,32 @@ describe('File specs', () => {
   })
 
   describe('.walk', () => {
-    it('lists files recursively in the directory', () => {
+    it('lists files in a single directory', () => {
+      let currentDir = require('path').resolve(__dirname)
+      return File.walk(currentDir).then(files => {
+        expect(files).to.include(__filename)
+      })
+    })
+
+    it('lists files recursively in sub directories', () => {
       let testsDir = require('path').resolve(__dirname + '/../')
       return File.walk(testsDir).then(files => {
         expect(files).to.include(__filename)
+      })
+    })
+
+    it('lists files recursively in sub (sub) directories', () => {
+      // This test may take a while since it will list all files in the project
+      let testsDir = require('path').resolve(__dirname + '/../../')
+      return File.walk(testsDir).then(files => {
+        expect(files).to.include(__filename)
+      })
+    })
+
+    it('rejects the promise if the directory doesnt exists', (done) => {
+      return File.walk('/tmp/kittens/').catch(err => {
+        expect(err).to.be.ok
+        done()
       })
     })
   })

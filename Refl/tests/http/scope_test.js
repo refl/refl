@@ -100,7 +100,7 @@ describe('Scope specs', () => {
     })
   })
 
-  describe('routing', () => {
+  describe('routing and dispatching', () => {
     let scope, router
     beforeEach(() => {
       router = new Router()

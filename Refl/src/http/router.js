@@ -31,6 +31,18 @@ class Router extends EventEmitter {
     }
     this.pipelines[name] = pipeline
   }
+
+  /*
+  ** Creates a new scope for this router, calling the given callback with it.
+  */
+  scope(callback) {
+    let scope = new Scope(this)
+    // TODO: study if we should store the scope reference in the router as well.
+    callback(scope)
+  }
+
+  dispatch(conn) {
+  }
 }
 
 exports.Router = Router

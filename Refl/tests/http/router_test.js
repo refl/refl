@@ -3,6 +3,7 @@
 const expect = require('chai').expect
 const sinon  = require('sinon')
 const Router = require('../../src/http/router').Router
+const Conn   = require('../../src/http/conn').Conn
 
 describe('Router specs', () => {
   it('is a class', () => {
@@ -40,7 +41,24 @@ describe('Router specs', () => {
     let router = null
     beforeEach(() => { router = new Router() })
 
-    it('creates a scope with a prefix')
-    it('creates a scope with a pipeline')
+    it('creates a scope for the current router', (done) => {
+      router.scope(scope => {
+        expect(scope._router).to.eq(router)
+        done()
+      })
+    })
+  })
+
+  describe('dispatch', () => {
+    it('correctly dispatches a mocked request', () => {
+      let router = new Router()
+      let handler = sinon.spy()
+      router.scope(scope => {
+        scope.get('/home', handler)
+      })
+      let conn = Conn.mockConn('GET', '/home')
+      router.dispatch(conn)
+      // expect(handler.called).to.be.true
+    })
   })
 })

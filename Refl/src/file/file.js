@@ -23,9 +23,37 @@ File.read = (filepath, encoding) => {
 }
 
 /*
-** Loads the given module 
+** Loads (and possibly reloads) the given module ignoring current cache.
 */
 File.requireUncached = (module) => {
+  delete require.cache[require.resolve(module)]
+  return require(module)
+}
+
+/*
+** Walks recursively through the given directory requiring all files ignoring
+** existing cache. This function should be used in debug mode, where files are 
+** changing all the time.
+*/
+File.requireUncachedAll = (dir) => {
+  return File.walk(dir).then(files => {
+    return files.map(file => {
+      return File.requireUncached(file)
+    })
+  })
+}
+
+/*
+** Walks recursively through the given directory requiring all files keeping
+** the current cached version. This function should be used in production,
+** where files are not expected to change from request to request.
+*/
+File.requireAll = (dir) => {
+  return File.walk(dir).then(files => {
+    return files.map(file => {
+      return require(file)
+    })
+  })
 }
 
 File.ls = (path) => {
@@ -51,7 +79,7 @@ File.stat = (path) => {
 }
 
 /*
-** Similar to `File.ls` but returns files in subdirectories recursively.
+** Similar to `File.ls`, but searches files in subdirectoties recursively.
 */
 File.walk = (dir) => {
   return new Promise((resolve, reject) => {
@@ -76,9 +104,7 @@ File.walk = (dir) => {
           }
         })
         if(pending === 0) next(files)
-      }).catch(err => {
-        reject(err)
-      })
+      }).catch(reject)
     }
     iterate(dir, resolve)
   })

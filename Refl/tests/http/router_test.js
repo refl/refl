@@ -58,7 +58,7 @@ describe('Router specs', () => {
       })
       let conn = Conn.mockConn('GET', '/home')
       router.dispatch(conn)
-      // expect(handler.called).to.be.true
+      expect(handler.called).to.be.true
     })
   })
 })

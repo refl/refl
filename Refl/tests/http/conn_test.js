@@ -3,7 +3,7 @@
 const expect = require('chai').expect
 const Conn = require('../../src/http/conn').Conn
 
-describe('Conn specs', () => {
+describe.only('Conn specs', () => {
   it('is an object', () => {
     expect(Conn).to.be.an('object')
   })
@@ -40,6 +40,16 @@ describe('Conn specs', () => {
       let conn = Conn.mockConn('GET', '/home')
       expect(conn.req.method).to.eq('GET')
       expect(conn.req.url).to.eq('/home')
+    })
+
+    it('stores the given method in the conn object', () => {
+      let conn = Conn.mockConn('GET', '/home')
+      expect(conn.method).to.eq('GET')
+    })
+
+    it('stores the path of the given url in the conn', () => {
+      let conn = Conn.mockConn('GET', '/home')
+      expect(conn.path).to.eq('/home')
     })
   })
 

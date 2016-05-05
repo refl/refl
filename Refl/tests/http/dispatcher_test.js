@@ -1,7 +1,8 @@
 'use strict'
 
-const expect = require('chai').expect
-const sinon  = require('sinon')
+const expect     = require('chai').expect
+const sinon      = require('sinon')
+const Conn       = require('../../src/http/conn').Conn
 const Dispatcher = require('../../src/http/dispatcher').Dispatcher
 
 describe('Dispatcher specs', () => {
@@ -18,17 +19,17 @@ describe('Dispatcher specs', () => {
 
     it('registers and dispatches a route without variables', () => {
       let handler = sinon.spy()
-      dispatcher.register('GET', '/my/path', handler)
-      dispatcher.dispatch('GET', '/my/path')
+      dispatcher.match('GET', '/my/path', handler)
+      dispatcher.dispatch(Conn.mockConn('GET', '/my/path'))
       expect(handler.called).to.be.true
     })
 
     it('calls only the first registered route', () => {
       let handler1 = sinon.spy()
       let handler2 = sinon.spy()
-      dispatcher.register('GET', '/home', handler1)
-      dispatcher.register('GET', '/home', handler2)
-      dispatcher.dispatch('GET', '/home')
+      dispatcher.match('GET', '/home', handler1)
+      dispatcher.match('GET', '/home', handler2)
+      dispatcher.dispatch(Conn.mockConn('GET', '/home'))
       expect(handler1.called).to.be.true
       expect(handler2.called).to.be.false
     })
@@ -36,8 +37,8 @@ describe('Dispatcher specs', () => {
     it('calls the route with the same HTTP method', () => {
       let handler1 = sinon.spy()
       let handler2 = sinon.spy()
-      dispatcher.register('GET', '/home', handler1)
-      dispatcher.register('PUT', '/home', handler2)
+      dispatcher.match('GET', '/home', handler1)
+      dispatcher.match('PUT', '/home', handler2)
       dispatcher.dispatch('PUT', '/home')
       expect(handler1.called).to.be.false
       expect(handler2.called).to.be.true
@@ -45,7 +46,7 @@ describe('Dispatcher specs', () => {
 
     it('matches routes with named params', () => {
       let handler = sinon.spy()
-      dispatcher.register('GET', '/users/:id', handler)
+      dispatcher.match('GET', '/users/:id', handler)
       dispatcher.dispatch('GET', '/users/10')
       expect(handler.called).to.be.true
     })
@@ -54,7 +55,7 @@ describe('Dispatcher specs', () => {
       let handler = (params) => {
         expect(params).to.eql({ id: '10' })
       }
-      dispatcher.register('GET', '/users/:id', handler)
+      dispatcher.match('GET', '/users/:id', handler)
       dispatcher.dispatch('GET', '/users/10')
     })
 
@@ -63,13 +64,13 @@ describe('Dispatcher specs', () => {
         expect(params).to.eql({ user_id: '10', comment_id: '15' })
         done()
       }
-      dispatcher.register('GET', '/users/:user_id/comments/:comment_id', handler)
+      dispatcher.match('GET', '/users/:user_id/comments/:comment_id', handler)
       dispatcher.dispatch('GET', '/users/10/comments/15')
     })
 
     it('raises an error if multiple params have the same name', () => {
       let registerFn = () => {
-        dispatcher.register('GET', '/users/:id/comments/:id', () => {})
+        dispatcher.match('GET', '/users/:id/comments/:id', () => {})
       }
       expect(registerFn).to.throw(/same name/)
     })
@@ -77,8 +78,8 @@ describe('Dispatcher specs', () => {
     it('matches the first route considering named params', () => {
       let handler1 = sinon.spy()
       let handler2 = sinon.spy()
-      dispatcher.register('GET', '/users/:id', handler1)
-      dispatcher.register('GET', '/users/luiz', handler2)
+      dispatcher.match('GET', '/users/:id', handler1)
+      dispatcher.match('GET', '/users/luiz', handler2)
       dispatcher.dispatch('GET', '/users/luiz')
       expect(handler1.called).to.be.true
       expect(handler2.called).to.be.false

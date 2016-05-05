@@ -1,10 +1,13 @@
 const Conn = exports.Conn = {}
+const Url = require('../locflow/url')
 
+/*
+** Testing is a big part of application development. It should be simple to
+** simulate a request, but it also should be reliable in the sense that if a 
+** mocked request worked, a normal request will too.
+*/
 Conn.mockRequest = (method, url) => {
-  return {
-    method,
-    url,
-  }
+  return { method, url, }
 }
 
 Conn.mockResponse = () => {
@@ -18,5 +21,9 @@ Conn.mockConn = (method, url) => {
 }
 
 Conn.buildConn = (req, res) => {
-  return { req, res }
+  return { 
+    req, 
+    res,
+    method: req.method,
+  }
 }

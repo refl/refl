@@ -45,7 +45,7 @@ class Dispatcher extends EventEmitter {
   /*
   ** Registers the given handler associated with (method, path).
   */
-  register(method, path, handler) {
+  match(method, path, handler) {
     if(!path.startsWith('/')) path = '/' + path
     let matcher = generateRouteRegex(path)
     let namedParams = findNamedParams(path)
@@ -65,8 +65,8 @@ class Dispatcher extends EventEmitter {
     })
   }
 
-  dispatch(method, path) {
-    let lastMatch
+  dispatch(conn) {
+    let lastMatch, method = conn.method, path = conn.path
     let route = this.routes.find(route => {
       lastMatch = path.match(route.matcher)
       return route.method === method && lastMatch
@@ -78,7 +78,8 @@ class Dispatcher extends EventEmitter {
           params[param] = lastMatch[index + 1]
         })
       }
-      route.handler(params)
+      conn.pathParams = params
+      route.handler(conn)
     }
   }
 }

@@ -64,6 +64,10 @@ class Scope {
   }
 
   match(method, path, handler) {
+    if(!this._router) {
+      throw new Error("No router associated with scope")
+    }
+    this._router.dispatcher.match(method, path, handler)
   }
 
   get(path, handler) {

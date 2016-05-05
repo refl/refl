@@ -4,11 +4,13 @@ const _ = require('lodash')
 const EventEmitter = require('events')
 const Scope = require('./scope').Scope
 const Pipeline = require('./pipeline').Pipeline
+const Dispatcher = require('./dispatcher').Dispatcher
 
 class Router extends EventEmitter {
   constructor() {
     super()
     this.pipelines = {}
+    this.dispatcher = new Dispatcher()
   }
 
   hasPipeline(name) {

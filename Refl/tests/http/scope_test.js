@@ -1,8 +1,12 @@
 'use strict'
 
 const expect = require('chai').expect
-const Scope = require('../../src/http/scope').Scope
+const Scope  = require('../../src/http/scope').Scope
 const Router = require('../../src/http/router').Router
+const sinon  = require('sinon')
+const Conn   = require('../../src/http/conn').Conn
+const _      = require('lodash')
+
 
 describe('Scope specs', () => {
   it('is a function class', () => {
@@ -27,6 +31,18 @@ describe('Scope specs', () => {
       let bindPrefix = () => { scope.prefix('/something') }
       expect(bindPrefix).not.to.throw(/already specified/)
       expect(bindPrefix).to.throw(/already specified/)
+    })
+  })
+
+  describe('pipeline', () => {
+    it('generates an anonymous pipeline if an array of function is provided', () => {
+      let router = new Router()
+      let scope = new Scope(router)
+      let handler1 = sinon.spy()
+      expect(_.keys(router.pipelines)).to.have.length(0)
+      scope.pipeThrough([handler1])
+      expect(_.keys(router.pipelines)).to.have.length(1)
+      expect(_.keys(router.pipelines)[0]).to.match(/pipeline_/)
     })
   })
 
@@ -108,13 +124,71 @@ describe('Scope specs', () => {
     })
 
     it('registers a GET route', () => {
-      scope.get('/home', conn => {
-      })
+      let handler = sinon.spy()
+      scope.get('/home', handler)
+      router.dispatch(Conn.mockConn('GET', '/home'))
+      expect(handler.called).to.be.true
     })
 
-    it('registers a POST route')
-    it('registers a PUT route')
-    it('registers a PATCH route')
-    it('registers a DELETE route')
+    it('registers a POST route', () => {
+      let handler = sinon.spy()
+      scope.post('/home', handler)
+      router.dispatch(Conn.mockConn('POST', '/home'))
+      expect(handler.called).to.be.true
+    })
+
+    it('registers a PUT route', () => {
+      let handler = sinon.spy()
+      scope.put('/home', handler)
+      router.dispatch(Conn.mockConn('PUT', '/home'))
+      expect(handler.called).to.be.true
+    })
+
+    it('registers a PATCH route', () => {
+      let handler = sinon.spy()
+      scope.patch('/home', handler)
+      router.dispatch(Conn.mockConn('PATCH', '/home'))
+      expect(handler.called).to.be.true
+    })
+
+    it('registers a DELETE route', () => {
+      let handler = sinon.spy()
+      scope.delete('/home', handler)
+      router.dispatch(Conn.mockConn('DELETE', '/home'))
+      expect(handler.called).to.be.true
+    })
+
+    it('registers a route with the scope prefix', () => {
+      scope.prefix('/cat')
+      let handler = sinon.spy()
+      scope.get('/home', handler)
+      router.dispatch(Conn.mockConn('GET', '/cat/home'))
+      expect(handler.called).to.be.true
+    })
+
+    it('registers a route with nested scope prefix', () => {
+      scope.prefix('/cat')
+      let handler = sinon.spy()
+      scope.group(scope => {
+        scope.prefix('/dog')
+        scope.get('/home', handler)
+      })
+      router.dispatch(Conn.mockConn('GET', '/cat/dog/home'))
+      expect(handler.called).to.be.true
+    })
+
+    it('calls the scope pipeline prior to the route handler', () => {
+      let step1 = sinon.spy()
+      let step2 = sinon.spy()
+      let handler = sinon.spy()
+      scope.pipeThrough([step1, step2])
+      scope.get('/home', handler)
+      router.dispatch(Conn.mockConn('GET', '/home'))
+      expect(step1.called).to.be.true
+      expect(step2.called).to.be.true
+      expect(handler.called).to.be.true
+    })
+
+    it('calls the parents scope pipeline prior to the nested pipeline')
   })
 })

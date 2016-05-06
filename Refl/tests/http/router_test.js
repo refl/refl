@@ -50,7 +50,7 @@ describe('Router specs', () => {
   })
 
   describe('dispatch', () => {
-    it('correctly dispatches a mocked request', () => {
+    it('dispatches a mocked request', () => {
       let router = new Router()
       let handler = sinon.spy()
       router.scope(scope => {
@@ -59,6 +59,16 @@ describe('Router specs', () => {
       let conn = Conn.mockConn('GET', '/home')
       router.dispatch(conn)
       expect(handler.called).to.be.true
+    })
+
+    it('dispatches a request to the correct HTTP method', () => {
+      let router = new Router()
+      let getHandler = sinon.spy()
+      let postHandler = sinon.spy()
+      router.scope(scope => {
+        scope.get('/home', getHandler)
+        scope.post('/home', postHandler)
+      })
     })
   })
 })

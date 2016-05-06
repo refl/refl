@@ -1,5 +1,7 @@
 'use strict'
 
+const _ = require('lodash')
+
 class Scope {
   constructor(router) {
     this._prefix = ''
@@ -45,15 +47,23 @@ class Scope {
   ** Specifies that all routes in this scope must pass through the given
   ** pipeline.
   */
-  pipeThrough(pipelineName) {
+  pipeThrough(pipeline) {
     if(!this._router) {
       throw new Error("scope doesn't belong to a router")
     }
-    let pipeline = this._router.pipeline(pipelineName)
-    if(!pipeline) {
-      throw new Error("pipeline ["+pipelineName+"] not found in router")
+    if(_.isArray(pipeline) && pipeline.length > 0) {
+      // We should create an anonymous pipeline, and then register it in this
+      // scope.
+      let pipelineName = _.uniqueId('pipeline_')
+      this._router.pipeline(pipelineName, pipeline)
+      this.pipeThrough(pipelineName)
+    } else {
+      let pipelineRef = this._router.pipeline(pipeline)
+      if(!pipelineRef) {
+        throw new Error("pipeline ["+pipeline+"] not found in router")
+      }
+      return this._pipelines.push(pipelineRef)
     }
-    return this._pipelines.push(pipeline)
   }
 
   /*
@@ -67,7 +77,7 @@ class Scope {
     if(!this._router) {
       throw new Error("No router associated with scope")
     }
-    this._router.dispatcher.match(method, path, handler)
+    return this._router.dispatcher.match(method, this.prefix() + path, handler)
   }
 
   get(path, handler) {

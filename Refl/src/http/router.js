@@ -1,16 +1,17 @@
 'use strict'
 
-const _ = require('lodash')
+const _            = require('lodash')
 const EventEmitter = require('events')
-const Scope = require('./scope').Scope
-const Pipeline = require('./pipeline').Pipeline
-const Dispatcher = require('./dispatcher').Dispatcher
+const Scope        = require('./scope').Scope
+const Pipeline     = require('./pipeline').Pipeline
+const Dispatcher   = require('./dispatcher').Dispatcher
 
 class Router extends EventEmitter {
   constructor() {
     super()
-    this.pipelines = {}
+    this.pipelines  = {}
     this.dispatcher = new Dispatcher()
+    this.dispatch   = this.dispatcher.dispatch.bind(this.dispatcher)
   }
 
   hasPipeline(name) {
@@ -39,11 +40,8 @@ class Router extends EventEmitter {
   */
   scope(callback) {
     let scope = new Scope(this)
-    // TODO: study if we should store the scope reference in the router as well.
+    // TODO: should we keep a scope reference in the router?
     callback(scope)
-  }
-
-  dispatch(conn) {
   }
 }
 

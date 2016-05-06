@@ -1,3 +1,5 @@
+'use strict'
+
 const Conn = exports.Conn = {}
 const Url = require('../locflow/url')
 
@@ -21,9 +23,12 @@ Conn.mockConn = (method, url) => {
 }
 
 Conn.buildConn = (req, res) => {
+  let url = new Url(req.url)
   return { 
     req, 
     res,
     method: req.method,
+    path: url.path,
+    query: url.queryObject(),
   }
 }

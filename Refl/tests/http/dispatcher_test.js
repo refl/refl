@@ -39,7 +39,7 @@ describe('Dispatcher specs', () => {
       let handler2 = sinon.spy()
       dispatcher.match('GET', '/home', handler1)
       dispatcher.match('PUT', '/home', handler2)
-      dispatcher.dispatch('PUT', '/home')
+      dispatcher.dispatch(Conn.mockConn('PUT', '/home'))
       expect(handler1.called).to.be.false
       expect(handler2.called).to.be.true
     })
@@ -47,25 +47,25 @@ describe('Dispatcher specs', () => {
     it('matches routes with named params', () => {
       let handler = sinon.spy()
       dispatcher.match('GET', '/users/:id', handler)
-      dispatcher.dispatch('GET', '/users/10')
+      dispatcher.dispatch(Conn.mockConn('GET', '/users/10'))
       expect(handler.called).to.be.true
     })
 
     it('calls the handler with named params', () => {
-      let handler = (params) => {
-        expect(params).to.eql({ id: '10' })
+      let handler = (conn) => {
+        expect(conn.pathParams).to.eql({ id: '10' })
       }
       dispatcher.match('GET', '/users/:id', handler)
-      dispatcher.dispatch('GET', '/users/10')
+      dispatcher.dispatch(Conn.mockConn('GET', '/users/10'))
     })
 
     it('calls the handler with multiple params', (done) => {
-      let handler = (params) => {
-        expect(params).to.eql({ user_id: '10', comment_id: '15' })
+      let handler = (conn) => {
+        expect(conn.pathParams).to.eql({ user_id: '10', comment_id: '15' })
         done()
       }
       dispatcher.match('GET', '/users/:user_id/comments/:comment_id', handler)
-      dispatcher.dispatch('GET', '/users/10/comments/15')
+      dispatcher.dispatch(Conn.mockConn('GET', '/users/10/comments/15'))
     })
 
     it('raises an error if multiple params have the same name', () => {
@@ -80,7 +80,7 @@ describe('Dispatcher specs', () => {
       let handler2 = sinon.spy()
       dispatcher.match('GET', '/users/:id', handler1)
       dispatcher.match('GET', '/users/luiz', handler2)
-      dispatcher.dispatch('GET', '/users/luiz')
+      dispatcher.dispatch(Conn.mockConn('GET', '/users/luiz'))
       expect(handler1.called).to.be.true
       expect(handler2.called).to.be.false
     })

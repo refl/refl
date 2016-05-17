@@ -44,7 +44,6 @@ class Scope {
   }
   group(callback) { return this.nest(callback) }
 
-
   /*
   ** Specifies that all routes in this scope must pass through the given
   ** pipeline.

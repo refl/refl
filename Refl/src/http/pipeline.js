@@ -31,6 +31,17 @@ class Pipeline {
     }
     return invokeNext(conn)
   }
+
+  // Generates a function that calls each step in the given pipelines and lastly
+  // the given handler.
+  static wrap(pipelines, handler) {
+    return function(conn) {
+      pipelines.forEach(pipeline => {
+        pipeline.invoke(conn, res => { conn = res })
+      })
+      return handler(conn)
+    }
+  }
 }
 
 exports.Pipeline = Pipeline

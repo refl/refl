@@ -178,8 +178,8 @@ describe('Scope specs', () => {
     })
 
     it('calls the scope pipeline prior to the route handler', () => {
-      let step1 = sinon.spy()
-      let step2 = sinon.spy()
+      let step1 = sinon.spy((conn, next) => { next(conn) })
+      let step2 = sinon.spy((conn, next) => { next(conn) })
       let handler = sinon.spy()
       scope.pipeThrough([step1, step2])
       scope.get('/home', handler)

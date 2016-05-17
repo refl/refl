@@ -1,6 +1,7 @@
 'use strict'
 
 const _ = require('lodash')
+const Pipeline = require('./pipeline').Pipeline
 
 class Scope {
   constructor(router) {
@@ -77,6 +78,9 @@ class Scope {
     if(!this._router) {
       throw new Error("No router associated with scope")
     }
+    // The wrap function returns a new function that invokes the given pipelines
+    // prior to the user handler.
+    handler = Pipeline.wrap(this._pipelines, handler)
     return this._router.dispatcher.match(method, this.prefix() + path, handler)
   }
 

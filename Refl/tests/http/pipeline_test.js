@@ -74,4 +74,48 @@ describe('Pipeline specs', () => {
       })
     })
   })
+
+  describe('#wrap', () => {
+    it('returns a wrapped function', () => {
+      let pipeline = new Pipeline("sample", [])
+      let wrapped = Pipeline.wrap([pipeline], function() {})
+      expect(wrapped).to.be.a('function')
+    })
+    
+    it('calls the handler if an empty pipeline is provided', () => {
+      let handler = sinon.spy()
+      let wrapped = Pipeline.wrap([], handler)
+      wrapped()
+      expect(handler.called).to.be.true
+    })
+    
+    it('calls the pipeline before the handler', () => {
+      let step1 = sinon.spy((num, next) => { next(num + 2) })
+      let step2 = sinon.spy((num, next) => { next(num * 3) })
+      let handler = sinon.spy(num => {
+        expect(num).to.eq(9)
+      })
+      let pipeline = new Pipeline("sample", [step1, step2])
+      let wrapped = Pipeline.wrap([pipeline], handler)
+      wrapped(1)
+      expect(step1.called).to.be.true
+      expect(step2.called).to.be.true
+      expect(handler.called).to.be.true
+    })
+
+    it('calls the pipeline in the same order in the array', () => {
+      let step1 = sinon.spy((num, next) => { next(num + 2) })
+      let step2 = sinon.spy((num, next) => { next(num * 3) })
+      let handler = sinon.spy(num => {
+        expect(num).to.eq(9)
+      })
+      let pipeline1 = new Pipeline("sample", [step1])
+      let pipeline2 = new Pipeline("other", [step2])
+      let wrapped = Pipeline.wrap([pipeline1, pipeline2], handler)
+      wrapped(1)
+      expect(step1.called).to.be.true
+      expect(step2.called).to.be.true
+      expect(handler.called).to.be.true
+    })
+  })
 })

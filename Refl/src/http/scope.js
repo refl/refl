@@ -2,6 +2,7 @@
 
 const _ = require('lodash')
 const Pipeline = require('./pipeline').Pipeline
+const Dispatcher = require('./dispatcher').Dispatcher
 
 class Scope {
   constructor(router) {
@@ -85,23 +86,23 @@ class Scope {
   }
 
   get(path, handler) {
-    return this.match('GET', path, handler)
+    return this.match(Dispatcher.methodGET, path, handler)
   }
 
   post(path, handler) {
-    return this.match('POST', path, handler)
+    return this.match(Dispatcher.methodPOST, path, handler)
   }
 
   put(path, handler) {
-    return this.match('PUT', path, handler)
+    return this.match(Dispatcher.methodPUT, path, handler)
   }
 
   patch(path, handler) {
-    return this.match('PATCH', path, handler)
+    return this.match(Dispatcher.methodPATCH, path, handler)
   }
 
   delete(path, handler) {
-    return this.match('DELETE', path, handler)
+    return this.match(Dispatcher.methodDELETE, path, handler)
   }
 }
 

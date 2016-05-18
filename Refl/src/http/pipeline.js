@@ -16,21 +16,35 @@ class Pipeline {
     return _.every(this.steps, _.isFunction)
   }
 
+  invoke(conn) {
+    return new Promise((resolve, reject) => {
+      this.steps.forEach(callback => {
+        new Promise((resolve, reject) => {
+          callback(conn, resolve, reject)
+        }).then(_conn => {
+          conn = _conn
+        }).catch(reject)
+      })
+    })
+  }
+
   /*
   ** Calls the 
   */
-  invoke(conn, callback) {
-    if(this.steps.length <= 0) return callback(conn)
-    let currentStep = 0
-    let invokeNext = (conn) => {
-      let currentCallback = this.steps[currentStep] || callback
-      currentStep += 1
-      if(currentCallback) {
-        return currentCallback(conn, invokeNext)
-      }
-    }
-    return invokeNext(conn)
-  }
+//  invoke(conn, callback) {
+//    return new Promise((resolve, reject) => {
+//      if(this.steps.length <= 0) return resolve(conn)
+//      let currentStep = 0
+//      let invokeNext = (conn) => {
+//        let currentCallback = this.steps[currentStep] || callback
+//        currentStep += 1
+//        if(currentCallback) {
+//          return currentCallback(conn, resolve, reject)
+//        }
+//      }
+//      invokeNext(conn)
+//    })
+//  }
 
   // Generates a function that calls each step in the given pipelines and lastly
   // the given handler.

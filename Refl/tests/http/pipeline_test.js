@@ -32,37 +32,39 @@ describe('Pipeline specs', () => {
 
   describe('#invoke', () => {
     it('calls all functions in the pipeline', () => {
-      let step1 = sinon.spy((conn, next) => { next(conn) })
-      let step2 = sinon.spy((conn, next) => { next(conn) })
+      let step1 = sinon.spy((conn, resolve, reject) => { resolve(conn) })
+      let step2 = sinon.spy((conn, resolve, reject) => { resolve(conn) })
       let pipeline = new Pipeline("sample", [step1, step2])
       pipeline.invoke()
       expect(step1.called).to.be.true
       expect(step2.called).to.be.true
     })
 
-    it('calls the pipeline step with the `invoke` argument', () => {
-      let step1 = (conn, next) => {
+    it('calls the pipeline step with the `invoke` argument', (done) => {
+      let step1 = (conn, resolve, reject) => {
         expect(conn).to.eql("my connection")
+        done()
       }
       let pipeline = new Pipeline("sample", [step1])
       pipeline.invoke("my connection")
     })
 
     it('calls the next step with the result from the previous', () => {
-      let step1 = sinon.spy((conn, next) => { next(conn + "bar") })
-      let step2 = sinon.spy((conn, next) => { expect(conn).to.eq("foobar") })
+      let step1 = sinon.spy((conn, resolve, reject) => { resolve(conn + "bar") })
+      let step2 = sinon.spy((conn, resolve, reject) => { expect(conn).to.eq("foobar") })
       let pipeline = new Pipeline("sample", [step1, step2])
       pipeline.invoke("foo")
       expect(step1.called).to.be.true
       expect(step2.called).to.be.true
     })
 
-    it('calls the given callback with the result from the last step', (done) => {
-      let step1 = (conn, next) => { next(conn + "bar") }
+    it.only('calls the given callback with the result from the last step', () => {
+      let step1 = (conn, resolve, reject) => { 
+        resolve(conn + "bar") 
+      }
       let pipeline = new Pipeline("sample", [step1])
-      pipeline.invoke("foo", conn => {
+      return pipeline.invoke("foo").then(conn => {
         expect(conn).to.eq("foobar")
-        done()
       })
     })
 

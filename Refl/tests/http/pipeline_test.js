@@ -32,52 +32,57 @@ describe('Pipeline specs', () => {
 
   describe('#invoke', () => {
     it('calls all functions in the pipeline', () => {
-      let step1 = sinon.spy((conn, resolve, reject) => { resolve(conn) })
-      let step2 = sinon.spy((conn, resolve, reject) => { resolve(conn) })
+      let step1 = sinon.spy(conn => { return Promise.resolve(conn) })
+      let step2 = sinon.spy(conn => { return Promise.resolve(conn) })
       let pipeline = new Pipeline("sample", [step1, step2])
-      pipeline.invoke()
-      expect(step1.called).to.be.true
-      expect(step2.called).to.be.true
+      return pipeline.invoke("proko")
+        .then(res => {
+          expect(res).to.eq("proko")
+          expect(step1.called).to.be.true
+          expect(step2.called).to.be.true
+        })
     })
 
-    it('calls the pipeline step with the `invoke` argument', (done) => {
-      let step1 = (conn, resolve, reject) => {
+    it('calls the pipeline step with the `invoke` argument', () => {
+      let step1 = conn => {
         expect(conn).to.eql("my connection")
-        done()
       }
       let pipeline = new Pipeline("sample", [step1])
-      pipeline.invoke("my connection")
+      return pipeline.invoke("my connection")
     })
 
     it('calls the next step with the result from the previous', () => {
-      let step1 = sinon.spy((conn, resolve, reject) => { resolve(conn + "bar") })
-      let step2 = sinon.spy((conn, resolve, reject) => { expect(conn).to.eq("foobar") })
+      let step1 = arg => { return Promise.resolve(arg + 'bar') }
+      let step2 = arg => { return Promise.resolve(arg + 'qux') }
       let pipeline = new Pipeline("sample", [step1, step2])
-      pipeline.invoke("foo")
-      expect(step1.called).to.be.true
-      expect(step2.called).to.be.true
+      return pipeline.invoke("foo")
+      .then(arg => {
+        expect(arg).to.eq('foobarqux')
+      })
     })
 
-    it.only('calls the given callback with the result from the last step', () => {
-      let step1 = (conn, resolve, reject) => { 
-        resolve(conn + "bar") 
-      }
+    it('calls the given callback with the result from the last step', () => {
+      let step1 = arg => { return Promise.resolve(arg + "bar") }
       let pipeline = new Pipeline("sample", [step1])
-      return pipeline.invoke("foo").then(conn => {
-        expect(conn).to.eq("foobar")
-      })
+      return pipeline.invoke("foo")
+        .then(arg => {
+          expect(arg).to.eq("foobar")
+        })
     })
 
-    it('calls the callback directly if the pipeline has no steps', (done) => {
+    it('calls the callback directly if the pipeline has no steps', () => {
       let pipeline = new Pipeline("sample", [])
-      pipeline.invoke("foo", conn => {
-        expect(conn).to.eq("foo")
-        done()
-      })
+      return pipeline.invoke("foo")
+        .then(arg => {
+          expect(arg).to.eq("foo")
+        })
     })
+
+    it('rejects the promise if a step rejects')
+    it('doesnt call the next step if a step rejects')
   })
 
-  describe('#wrap', () => {
+  describe.only('#wrap', () => {
     it('returns a wrapped function', () => {
       let pipeline = new Pipeline("sample", [])
       let wrapped = Pipeline.wrap([pipeline], function() {})
@@ -87,22 +92,22 @@ describe('Pipeline specs', () => {
     it('calls the handler if an empty pipeline is provided', () => {
       let handler = sinon.spy()
       let wrapped = Pipeline.wrap([], handler)
-      wrapped()
-      expect(handler.called).to.be.true
+      return wrapped()
+        .then(arg => {
+          expect(handler.called).to.be.true
+        })
     })
     
-    it('calls the pipeline before the handler', () => {
-      let step1 = sinon.spy((num, next) => { next(num + 2) })
-      let step2 = sinon.spy((num, next) => { next(num * 3) })
-      let handler = sinon.spy(num => {
-        expect(num).to.eq(9)
-      })
+    it('calls the pipeline in order before the handler', () => {
+      let step1   = arg => { return Promise.resolve(arg + 2) }
+      let step2   = arg => { return Promise.resolve(arg * 3) }
+      let handler = arg => { return Promise.resolve(arg + 1) }
       let pipeline = new Pipeline("sample", [step1, step2])
       let wrapped = Pipeline.wrap([pipeline], handler)
-      wrapped(1)
-      expect(step1.called).to.be.true
-      expect(step2.called).to.be.true
-      expect(handler.called).to.be.true
+      return wrapped(1)
+        .then(arg => {
+          expect(arg).to.eq(10) // 1 + 2, 3 * 3, 9 + 1 => 10
+        })
     })
 
     it('calls the pipeline in the same order in the array', () => {

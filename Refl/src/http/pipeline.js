@@ -17,43 +17,25 @@ class Pipeline {
   }
 
   invoke(conn) {
-    return new Promise((resolve, reject) => {
-      this.steps.forEach(callback => {
-        new Promise((resolve, reject) => {
-          callback(conn, resolve, reject)
-        }).then(_conn => {
-          conn = _conn
-        }).catch(reject)
+    return this.steps.reduce((promise, callback) => {
+      return promise.then(conn => {
+        return callback(conn)
       })
-    })
+    }, Promise.resolve(conn))
   }
-
-  /*
-  ** Calls the 
-  */
-//  invoke(conn, callback) {
-//    return new Promise((resolve, reject) => {
-//      if(this.steps.length <= 0) return resolve(conn)
-//      let currentStep = 0
-//      let invokeNext = (conn) => {
-//        let currentCallback = this.steps[currentStep] || callback
-//        currentStep += 1
-//        if(currentCallback) {
-//          return currentCallback(conn, resolve, reject)
-//        }
-//      }
-//      invokeNext(conn)
-//    })
-//  }
 
   // Generates a function that calls each step in the given pipelines and lastly
   // the given handler.
   static wrap(pipelines, handler) {
     return function(conn) {
-      pipelines.forEach(pipeline => {
-        pipeline.invoke(conn, res => { conn = res })
+      let promise = pipelines.reduce((promise, pipeline) => {
+        return promise.then(conn => {
+          return pipeline.invoke(conn)
+        })
+      }, Promise.resolve(conn))
+      return promise.then(conn => {
+        return handler(conn)
       })
-      return handler(conn)
     }
   }
 }

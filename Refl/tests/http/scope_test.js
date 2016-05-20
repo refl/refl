@@ -123,7 +123,7 @@ describe('Scope specs', () => {
       scope = new Scope(router)
     })
 
-    it('registers a GET route', () => {
+    it.only('registers a GET route', () => {
       let handler = sinon.spy()
       scope.get('/home', handler)
       router.dispatch(Conn.mockConn('GET', '/home'))

@@ -82,7 +82,7 @@ describe('Pipeline specs', () => {
     it('doesnt call the next step if a step rejects')
   })
 
-  describe.only('#wrap', () => {
+  describe('#wrap', () => {
     it('returns a wrapped function', () => {
       let pipeline = new Pipeline("sample", [])
       let wrapped = Pipeline.wrap([pipeline], function() {})
@@ -111,18 +111,19 @@ describe('Pipeline specs', () => {
     })
 
     it('calls the pipeline in the same order in the array', () => {
-      let step1 = sinon.spy((num, next) => { next(num + 2) })
-      let step2 = sinon.spy((num, next) => { next(num * 3) })
-      let handler = sinon.spy(num => {
-        expect(num).to.eq(9)
-      })
+      let step1 = arg => { return Promise.resolve(arg + 2) }
+      let step2 = arg => { return Promise.resolve(arg * 3) }
+      let handler = arg => { return Promise.resolve(arg) }
       let pipeline1 = new Pipeline("sample", [step1])
       let pipeline2 = new Pipeline("other", [step2])
       let wrapped = Pipeline.wrap([pipeline1, pipeline2], handler)
       wrapped(1)
-      expect(step1.called).to.be.true
-      expect(step2.called).to.be.true
-      expect(handler.called).to.be.true
+        .then(arg => {
+          expect(step1.called).to.be.true
+          expect(step2.called).to.be.true
+          expect(handler.called).to.be.true
+          expect(arg).to.eq(9) // 1 + 2, 3 * 3
+        })
     })
   })
 })

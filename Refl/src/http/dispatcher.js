@@ -79,6 +79,7 @@ class Dispatcher extends EventEmitter {
         })
       }
       conn.pathParams = params
+      console.log("calling the found handler!")
       route.handler(conn)
     }
   }

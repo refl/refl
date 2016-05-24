@@ -43,7 +43,7 @@ describe('Router specs', () => {
 
     it('creates a scope for the current router', (done) => {
       router.scope(scope => {
-        expect(scope._router).to.eq(router)
+        expect(scope._router).to.eq(router) // we prefix private attrs with "_"
         done()
       })
     })
@@ -57,8 +57,10 @@ describe('Router specs', () => {
         scope.get('/home', handler)
       })
       let conn = Conn.mockConn('GET', '/home')
-      router.dispatch(conn)
-      expect(handler.called).to.be.true
+      return router.dispatch(conn)
+        .then(arg => {
+          expect(handler.called).to.be.true
+        })
     })
 
     it('dispatches a request to the correct HTTP method', () => {
@@ -69,6 +71,11 @@ describe('Router specs', () => {
         scope.get('/home', getHandler)
         scope.post('/home', postHandler)
       })
+      return router.dispatch(Conn.mockConn('POST', '/home'))
+        .then(arg => {
+          expect(getHandler.called).to.be.false
+          expect(postHandler.called).to.be.true
+        })
     })
   })
 })

@@ -123,47 +123,77 @@ describe('Scope specs', () => {
       scope = new Scope(router)
     })
 
-    it.only('registers a GET route', () => {
+    it('registers a GET route', () => {
       let handler = sinon.spy()
       scope.get('/home', handler)
-      router.dispatch(Conn.mockConn('GET', '/home'))
-      expect(handler.called).to.be.true
+      return router.dispatch(Conn.mockConn('GET', '/home'))
+        .then(arg => {
+          expect(handler.called).to.be.true
+        })
     })
 
     it('registers a POST route', () => {
       let handler = sinon.spy()
       scope.post('/home', handler)
-      router.dispatch(Conn.mockConn('POST', '/home'))
-      expect(handler.called).to.be.true
+      return router.dispatch(Conn.mockConn('POST', '/home'))
+        .then(arg => {
+          expect(handler.called).to.be.true
+        })
     })
 
     it('registers a PUT route', () => {
       let handler = sinon.spy()
       scope.put('/home', handler)
-      router.dispatch(Conn.mockConn('PUT', '/home'))
-      expect(handler.called).to.be.true
+      return router.dispatch(Conn.mockConn('PUT', '/home'))
+        .then(arg => {
+          expect(handler.called).to.be.true
+        })
     })
 
     it('registers a PATCH route', () => {
       let handler = sinon.spy()
       scope.patch('/home', handler)
-      router.dispatch(Conn.mockConn('PATCH', '/home'))
-      expect(handler.called).to.be.true
+      return router.dispatch(Conn.mockConn('PATCH', '/home'))
+        .then(arg => {
+          expect(handler.called).to.be.true
+        })
     })
 
     it('registers a DELETE route', () => {
       let handler = sinon.spy()
       scope.delete('/home', handler)
-      router.dispatch(Conn.mockConn('DELETE', '/home'))
-      expect(handler.called).to.be.true
+      return router.dispatch(Conn.mockConn('DELETE', '/home'))
+        .then(arg => {
+          expect(handler.called).to.be.true
+        })
+    })
+
+    it('returns a promise that resolves with the return value from the handler', () => {
+      let handler = conn => { return conn.json({hello: "world"}) }
+      scope.get('/home', handler)
+      return router.dispatch(Conn.mockConn('GET', '/home'))
+        .then(res => {
+          expect(res).to.eq('{\"hello\":\"world\"}')
+        })
+    })
+
+    it('returns a promise that resolves with a value returned directly from the handler', () => {
+      let handler = conn => { return { hello: "world" } }
+      scope.get('/home', handler)
+      return router.dispatch(Conn.mockConn('GET', '/home'))
+        .then(arg => {
+          expect(arg).to.eql({hello: "world"}) // not serialized yet.
+        })
     })
 
     it('registers a route with the scope prefix', () => {
       scope.prefix('/cat')
       let handler = sinon.spy()
       scope.get('/home', handler)
-      router.dispatch(Conn.mockConn('GET', '/cat/home'))
-      expect(handler.called).to.be.true
+      return router.dispatch(Conn.mockConn('GET', '/cat/home'))
+        .then(arg => {
+          expect(handler.called).to.be.true
+        })
     })
 
     it('registers a route with nested scope prefix', () => {
@@ -173,20 +203,24 @@ describe('Scope specs', () => {
         scope.prefix('/dog')
         scope.get('/home', handler)
       })
-      router.dispatch(Conn.mockConn('GET', '/cat/dog/home'))
-      expect(handler.called).to.be.true
+      return router.dispatch(Conn.mockConn('GET', '/cat/dog/home'))
+        .then(arg => {
+          expect(handler.called).to.be.true
+        })
     })
 
     it('calls the scope pipeline prior to the route handler', () => {
-      let step1 = sinon.spy((conn, next) => { next(conn) })
-      let step2 = sinon.spy((conn, next) => { next(conn) })
+      let step1 = sinon.spy(conn => { return Promise.resolve(conn) })
+      let step2 = sinon.spy(conn => { return Promise.resolve(conn) })
       let handler = sinon.spy()
       scope.pipeThrough([step1, step2])
       scope.get('/home', handler)
-      router.dispatch(Conn.mockConn('GET', '/home'))
-      expect(step1.called).to.be.true
-      expect(step2.called).to.be.true
-      expect(handler.called).to.be.true
+      return router.dispatch(Conn.mockConn('GET', '/home'))
+        .then(arg => {
+          expect(step1.called).to.be.true
+          expect(step2.called).to.be.true
+          expect(handler.called).to.be.true
+        })
     })
 
     it('calls the parents scope pipeline prior to the nested pipeline')

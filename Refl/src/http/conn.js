@@ -14,12 +14,30 @@ Conn.mockRequest = (method, url) => {
 
 Conn.mockResponse = () => {
   return {
-    send: (str) => { this.response = str }
+    end: function(str) { 
+      str ? this._body = str : this._body
+      this.finished = true
+    },
+    write: function(str) {
+      this._body ? this._body += str : this._body = str
+    },
+    finished: false,
   }
 }
 
 Conn.mockConn = (method, url) => {
   return Conn.buildConn(Conn.mockRequest(method, url), Conn.mockResponse())
+}
+
+/*
+** Returns as promise that resolves with the given object stringified and
+** rejects if the operation failed.
+*/
+Conn.json = function(object) {
+  return new Promise((resolve, reject) => {
+    let string = JSON.stringify(object)
+    resolve(string)
+  })
 }
 
 Conn.buildConn = (req, res) => {
@@ -30,5 +48,6 @@ Conn.buildConn = (req, res) => {
     method: req.method,
     path: url.path,
     query: url.queryObject(),
+    json: Conn.json
   }
 }

@@ -32,19 +32,42 @@ describe('HTTPServer specs', () => {
         })
     })
 
-    it('Stringifies the content if the handler returns an object', () => {
-      let req = Conn.mockRequest('GET', '/home')
-      let res = Conn.mockResponse()
+    it('stringifies the content if the handler returns an object', () => {
       router.scope(scope => {
         scope.get('/home', conn => {
           return { hello: "world" }
         })
       })
 
-      return server.handleRequest(req, res)
+      let conn = Conn.mockConn('GET', '/home')
+      return server.handleRequest(conn.req, conn.res)
         .then(arg => {
-          expect(res._body).to.eq('{"hello":"world"}')
+          expect(conn.res._body).to.eq('{"hello":"world"}')
         })
+    })
+
+    it('assigns the conn statusCode to the response object', () => {
+      router.scope(scope => {
+        scope.get('/home', conn => {
+          return "hello"
+        })
+      })
+
+      let conn = Conn.mockConn('GET', '/home')
+      return server.handleRequest(conn.req, conn.res)
+        .then(arg => {
+          expect(conn.res.statusCode).to.eq(conn.statusCode)
+        })
+    })
+
+    it('specifies the response status stored in the conn', () => {
+      router.scope(scope => {
+        scope.get('/home', conn => {
+          return conn.status(280)
+        })
+      })
+
+      // let conn = Conn.mockConn('GET', '/home')
     })
   })
 })

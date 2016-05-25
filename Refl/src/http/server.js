@@ -12,13 +12,18 @@ class HTTPServer {
     this.server.on('error', this.handleServerError.bind(this))
   }
 
+  /*
+  ** This callback is called for each request we receive.
+  */
   handleRequest(req, res) {
     let conn = Conn.buildConn(req, res)
     return this.router.dispatch(conn)
       .then(content => {
-        if(_.isObject(content)) {
-          content = JSON.stringify(content)
-        }
+        if(_.isObject(content)) content = JSON.stringify(content)
+
+        // Node's HTTP library will pick this value up.
+        conn.res.statusCode = conn.statusCode
+
         conn.res.end(content)
       })
       .catch(err => {
@@ -39,6 +44,12 @@ class HTTPServer {
         Log.info('HTTP server running on port [' + port + ']')
         resolve(e)
       })
+    })
+  }
+
+  close() {
+    return new Promise((resolve, reject) => {
+      this.server.close(resolve)
     })
   }
 }

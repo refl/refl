@@ -32,11 +32,7 @@ class App {
   ** returns a promise that resolves when all services are stopped.
   */
   close() {
-    return new Promise((resolve, reject) => {
-      this.server.close(() => {
-        resolve()
-      })
-    })
+    return this.server.close()
   }
 }
 
@@ -63,9 +59,12 @@ exports.initializeApp = function initializeApp(appName) {
 */
 exports.clearAllApps = function clearAllApps() {
   let appNames = _.keys(apps)
-  // return _.reduce(appNames, (promise, appName) => {
-  //   return promise.then(() => {
-
-  //   })
-  // }, Promise.resolve())
+  let lastPromise = _.reduce(appNames, (promise, appName) => {
+    return promise.then(() => {
+      let app = apps[appName]
+      delete apps[appName] // remove from our apps map
+      return app.close()
+    })
+  }, Promise.resolve())
+  return lastPromise
 }

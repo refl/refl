@@ -1,53 +1,78 @@
 'use strict'
 
-const Conn = exports.Conn = {}
-const Url = require('../locflow/url')
+const EventEmitter = require('events')
+const Url          = require('../locflow/url')
 
-/*
-** Testing is a big part of application development. It should be simple to
-** simulate a request, but it also should be reliable in the sense that if a 
-** mocked request worked a normal request will too.
-*/
-Conn.mockRequest = (method, url) => {
-  return { method, url, }
-}
+const genericNotFoundError = new Error("Resource not found")
 
-Conn.mockResponse = () => {
-  return {
-    end: function(str) { 
-      str ? this._body = str : this._body
-      this.finished = true
-    },
-    write: function(str) {
-      this._body ? this._body += str : this._body = str
-    },
-    finished: false,
+class Conn extends EventEmitter {
+  constructor(req, res) {
+    super()
+    this.url        = new Url(req.url)
+    this.req        = req
+    this.res        = res
+    this.statusCode = 200
+    this.method     = req.method
+    this.path       = this.url.path
+    this.query      = this.url.queryObject()
+  }
+
+  /*
+  ** Stringifies the given `object` and returns it. We don't need to return a
+  ** promise because the "invoke" operation on the pipeline already wraps this
+  ** function in a promise.
+  */
+  json(object) {
+    return JSON.stringify(object)
+  }
+
+  /*
+  ** Updates internal response status to 404 and breaks out of the promise chain
+  ** with an error.
+  */
+  notFound(notFoundError) {
+    this.status = 404
+    if(notFoundError) throw notFoundError
+    else              throw genericNotFoundError("Resource not found")
+  }
+
+  /*
+  ** Stores the given `statusCode` as the response status from this conn object.
+  */
+  status(statusCode) {
+    this.statusCode = statusCode
+    return this
+  }
+
+  /*
+  ** Testing is a big part of application development. It should be simple to
+  ** simulate a request, but it also should be reliable in the sense that if a 
+  ** mocked request worked a normal request will too.
+  */
+  static mockRequest(method, url) {
+    return { method, url }
+  }
+
+  static mockResponse() {
+    return {
+      end: function(str) { 
+        str ? this._body = str : this._body
+        this.finished = true
+      },
+      write: function(str) {
+        this._body ? this._body += str : this._body = str
+      },
+      finished: false,
+    }
+  }
+
+  static mockConn(method, url) {
+    return new Conn(Conn.mockRequest(method, url), Conn.mockResponse())
+  }
+
+  static buildConn(req, res) {
+    return new Conn(req, res)
   }
 }
 
-Conn.mockConn = (method, url) => {
-  return Conn.buildConn(Conn.mockRequest(method, url), Conn.mockResponse())
-}
-
-/*
-** Returns as promise that resolves with the given object stringified and
-** rejects if the operation failed.
-*/
-Conn.json = function(object) {
-  return new Promise((resolve, reject) => {
-    let string = JSON.stringify(object)
-    resolve(string)
-  })
-}
-
-Conn.buildConn = (req, res) => {
-  let url = new Url(req.url)
-  return { 
-    req, 
-    res,
-    method: req.method,
-    path: url.path,
-    query: url.queryObject(),
-    json: Conn.json
-  }
-}
+exports.Conn = Conn

@@ -4,8 +4,8 @@ const expect = require('chai').expect
 const Conn = require('../../src/http/conn').Conn
 
 describe('Conn specs', () => {
-  it('is an object', () => {
-    expect(Conn).to.be.an('object')
+  it('is a function class', () => {
+    expect(Conn).to.be.a('function')
   })
 
   describe('.mockRequest', () => {
@@ -82,6 +82,13 @@ describe('Conn specs', () => {
         opt: 'on',
       })
     })
+
+    // This test is in here because it calls `buildConn` internally and we're
+    // testing a buildConn behaviour. Maybe change later.
+    it('has a default status of 200', () => {
+      let conn = Conn.mockConn('GET', '/home')
+      expect(conn.statusCode).to.eq(200)
+    })
   })
 
   describe('#empty', () => {
@@ -91,26 +98,45 @@ describe('Conn specs', () => {
     let conn
     beforeEach(() => { conn = Conn.mockConn('GET', '/home') })
 
-    it('returns a promise', () => {
-      let promise = conn.json({})
-      expect(promise.then).to.be.a('function')
-      expect(promise.catch).to.be.a('function')
+    it('returns the stringified version of the given object', () => {
+      let json = conn.json({hello: "world"})
+      expect(json).to.eq('{"hello":"world"}')
     })
 
-    it('resolves the promise with the JSON string', () => {
-      return conn.json({hello: "world"})
-        .then(str => {
-          expect(str).to.eq('{"hello":"world"}')
-        })
-    })
-
-    it('rejects the promise if JSON failed to stringify', () => {
+    it('throws an error if stringify operation fails', () => {
       let obj = {a: 10}
       obj.b = obj // circular reference
-      return conn.json(obj)
-        .catch(err => {
-          expect(err).to.be.ok
-        })
+      let stringify = () => { conn.json(obj) }
+      expect(stringify).to.throw()
     })
+  })
+
+  describe('#notFound', () => {
+    it('assigns 404 to the conn status', () => {
+      let conn = Conn.mockConn('GET', '/home')
+      conn.notFound()
+      expect(conn.status).to.eq(404)
+    })
+
+    it('returns an empty response')
+  })
+
+  describe('#status', () => {
+    it('stores the given status internally', () => {
+      let conn = Conn.mockConn('GET', '/home')
+      conn.status(280)
+      expect(conn.statusCode).to.eq(280)
+    })
+
+    it('returns the conn itself', () => {
+      let conn = Conn.mockConn('GET', '/home')
+      expect(conn.status(280)).to.eq(conn)
+    })
+  })
+
+  describe('events', () => {
+    it('registers a callback with the `on` function')
+    it('calls the `beforeSend` callback before the conn sends')
+    it('calls the `afterSend` callback after the conn sends')
   })
 })

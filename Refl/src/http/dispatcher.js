@@ -1,7 +1,8 @@
 'use strict'
 
 const EventEmitter = require('events')
-const _ = require('lodash')
+const _            = require('lodash')
+const Conn         = require('./conn').Conn
 
 /*
 ** Generates the matching regular expression for the given path. This regexp
@@ -80,6 +81,8 @@ class Dispatcher extends EventEmitter {
       }
       conn.pathParams = params
       return route.handler(conn)
+    } else {
+      return Promise.resolve(Conn.build404(conn))
     }
   }
 }

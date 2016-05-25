@@ -8,7 +8,7 @@ describe('initializer specs', () => {
 
   describe('initializeApp', () => {
     beforeEach(() => {
-      Initializer.clearAllApps()
+      return Initializer.clearAllApps()
     })
     
     it('returns a promise that resolves with the app with the given name', () => {

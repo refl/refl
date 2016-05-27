@@ -1,5 +1,8 @@
 const expect      = require('chai').expect
 const Initializer = require('../../src/app/initializer')
+const Refl        = require('../../src/refl')
+const Registry    = require('../../src/app/registry')
+const _           = require('lodash')
 
 describe('initializer specs', () => {
   it('is an object', () => {
@@ -32,6 +35,32 @@ describe('initializer specs', () => {
       return Initializer.initializeApp('MyApp')
         .then(app => {
           expect(app.router).to.be.ok
+        })
+    })
+  })
+
+  describe('.load', () => {
+    beforeEach(() => {
+      return Initializer.clearAllApps()
+    })
+
+    it('stores a reference to the entry script in the refl object', () => {
+      return Initializer.initializeApp('MyApp')
+        .then(app => {
+          expect(Registry.countEntries()).to.eq(0)
+          app.load(require.resolve('../resources/app1.js'))
+          expect(Registry.countEntries()).to.eq(1)
+          expect(Registry.getApp(require.resolve('../resources/app1.js'))).to.eq(app)
+        })
+    })
+
+    it('throws an error if entry script doesnt export a function', () => {
+      return Initializer.initializeApp('MyApp')
+        .then(app => {
+          app.load(require.resolve('../resources/app2.js'))
+        })
+        .catch(err => {
+          expect(err).to.match(/exported as a function/)
         })
     })
   })

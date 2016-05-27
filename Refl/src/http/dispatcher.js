@@ -4,6 +4,8 @@ const EventEmitter = require('events')
 const _            = require('lodash')
 const Conn         = require('./conn').Conn
 
+const routeNotFoundError = new Error("Route not found")
+
 /*
 ** Generates the matching regular expression for the given path. This regexp
 ** is matched against incoming HTTP request's path.
@@ -66,6 +68,13 @@ class Dispatcher extends EventEmitter {
     })
   }
 
+  /*
+  ** Erases existing routes. This function will be used only in debug mode.
+  */
+  reset() {
+    this.routes.length = 0
+  }
+
   dispatch(conn) {
     let lastMatch, method = conn.method, path = conn.path
     let route = this.routes.find(route => {
@@ -82,7 +91,9 @@ class Dispatcher extends EventEmitter {
       conn.pathParams = params
       return route.handler(conn)
     } else {
-      return Promise.resolve(Conn.build404(conn))
+      return new Promise((resolve, reject) => {
+        conn.notFound(routeNotFoundError)
+      })
     }
   }
 }

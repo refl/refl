@@ -1,3 +1,5 @@
+'use strict'
+
 const expect = require('chai').expect
 const HTTPServer = require('../../src/http/server').HTTPServer
 const Conn = require('../../src/http/conn').Conn

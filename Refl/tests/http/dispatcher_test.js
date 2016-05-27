@@ -84,5 +84,23 @@ describe('Dispatcher specs', () => {
       expect(handler1.called).to.be.true
       expect(handler2.called).to.be.false
     })
+
+    it('rejects the promise and assgins 404 to the conn if no route was found', () => {
+      let conn = Conn.mockConn('GET', '/something')
+      return dispatcher.dispatch(conn)
+        .catch(err => {
+          expect(conn.statusCode).to.eq(404)
+        })
+    })
+  })
+
+  describe('#reset', () => {
+    it('removes existing routes', () => {
+      let dispatcher = new Dispatcher
+      dispatcher.match('GET', '/home', function() {})
+      expect(dispatcher.routes).to.have.length(1)
+      dispatcher.reset()
+      expect(dispatcher.routes).to.have.length(0)
+    })
   })
 })

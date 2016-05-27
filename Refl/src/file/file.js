@@ -31,14 +31,23 @@ File.requireUncached = (module) => {
 }
 
 /*
+** Removes scripts from the `require` cache.
+*/
+File.clearAppsRequireCache = function() {
+  for(let moduleName in require.cache) {
+    delete require.cache[moduleName]
+  }
+}
+
+/*
 ** Walks recursively through the given directory requiring all files ignoring
 ** existing cache. This function should be used in debug mode, where files are 
 ** changing all the time.
 */
-File.requireUncachedAll = (dir) => {
+File.requireAll = (dir) => {
   return File.walk(dir).then(files => {
     return files.map(file => {
-      return File.requireUncached(file)
+      return require(file)
     })
   })
 }

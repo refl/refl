@@ -78,4 +78,28 @@ describe('Router specs', () => {
         })
     })
   })
+
+  describe('#reset', () => {
+    it('resets existing routes', () => {
+      let router = new Router
+      router.scope(scope => {
+        scope.get('/home', function() {})
+        scope.get('/else', function() {})
+      })
+      expect(router.dispatcher.routes).to.have.length(2)
+      router.reset()
+      expect(router.dispatcher.routes).to.have.length(0)
+    })
+
+    it('resets existing pipelines', () => {
+      let router = new Router()
+      router.pipeline('my-pipeline', [])
+      expect(router.pipeline('my-pipeline')).to.be.ok
+      router.reset()
+      expect(router.pipeline('my-pipeline')).not.to.be.ok
+      
+      // defining the same pipeline doesn't raise
+      router.pipeline('my-pipeline', [])
+    })
+  })
 })

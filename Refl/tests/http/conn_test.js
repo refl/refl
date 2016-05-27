@@ -114,11 +114,17 @@ describe('Conn specs', () => {
   describe('#notFound', () => {
     it('assigns 404 to the conn status', () => {
       let conn = Conn.mockConn('GET', '/home')
-      conn.notFound()
-      expect(conn.status).to.eq(404)
+      try {
+        conn.notFound() // ignoring the thrown error for now
+      } catch(e) {}
+      expect(conn.statusCode).to.eq(404)
     })
 
-    it('returns an empty response')
+    it('throws resource not found error', () => {
+      let conn = Conn.mockConn('GET', '/home')
+      let handler = () => { conn.notFound() }
+      expect(handler).to.throw(/not found/)
+    })
   })
 
   describe('#status', () => {

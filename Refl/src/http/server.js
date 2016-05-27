@@ -2,6 +2,7 @@
 
 const http = require('http')
 const Conn = require('./conn').Conn
+const Refl = require('../refl')
 const Log  = require('../log')
 const _    = require('lodash')
 
@@ -16,18 +17,26 @@ class HTTPServer {
   ** This callback is called for each request we receive.
   */
   handleRequest(req, res) {
+    try {
+      Refl.prepareInteraction({server: this, router: this.router})
+    } catch(err) {
+      // The error we're catching will be compilation related, such as invalid
+      // syntax or module not found in require.
+      res.statusCode = 500
+      res.end(err.stack)
+      return
+    }
+
     let conn = Conn.buildConn(req, res)
     return this.router.dispatch(conn)
       .then(content => {
         if(_.isObject(content)) content = JSON.stringify(content)
-
-        // Node's HTTP library will pick this value up.
         conn.res.statusCode = conn.statusCode
-
         conn.res.end(content)
       })
       .catch(err => {
-        conn.res.end(err)
+        conn.res.statusCode = conn.statusCode
+        conn.res.end(err.stack)
       })
   }
 

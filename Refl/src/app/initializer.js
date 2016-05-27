@@ -1,40 +1,12 @@
-const Router            = require('../http/router').Router
-const HTTPServer        = require('../http/server').HTTPServer
-const ClusterHTTPServer = require('../http/server').ClusterHTTPServer
-const _                 = require('lodash')
+'use strict'
+
+const _ = require('lodash')
 
 /*
 ** Stores apps initialized through the `initializeApp` function. Refl denies
 ** the same name for multiple apps - thus an object.
 */
 let apps = {}
-
-class App {
-  constructor(name) {
-    this.name = name
-    this.router = new Router()
-  }
-
-  /*
-  ** Returns a promise that resolves with the app after every service is 
-  ** initialized.
-  */
-  initialize() {
-    this.server = new HTTPServer(this.router)
-    return this.server.listen(8080)
-      .then(status => {
-        return this
-      })
-  }
-
-  /*
-  ** Closes all services (HTTP server, database connection, etc.). This function
-  ** returns a promise that resolves when all services are stopped.
-  */
-  close() {
-    return this.server.close()
-  }
-}
 
 /*
 ** Refl's initialization process involves the following steps:
@@ -45,10 +17,11 @@ class App {
 ** - Loading controllers 
 ** - Starting a HTTP server
 */
-exports.initializeApp = function initializeApp(appName) {
+exports.initializeApp = function initializeApp(appName, config) {
   if(apps[appName]) {
     throw new Error("app with name [" + appName + "] already exists")
   }
+  const App = require('./app').App
   let app = new App(appName)
   apps[appName] = app
   return app.initialize()

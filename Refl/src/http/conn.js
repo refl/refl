@@ -31,9 +31,9 @@ class Conn extends EventEmitter {
   ** with an error.
   */
   notFound(notFoundError) {
-    this.status = 404
+    this.status(404)
     if(notFoundError) throw notFoundError
-    else              throw genericNotFoundError("Resource not found")
+    else              throw genericNotFoundError
   }
 
   /*

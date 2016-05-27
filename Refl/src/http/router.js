@@ -35,6 +35,13 @@ class Router extends EventEmitter {
     this.pipelines[name] = pipeline
   }
 
+  reset() {
+    this.dispatcher.reset()
+    for(let pipelineName in this.pipelines) {
+      delete this.pipelines[pipelineName]
+    }
+  }
+
   /*
   ** Creates a new scope for this router, calling the given callback with it.
   */

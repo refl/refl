@@ -1,11 +1,8 @@
-const Refl = require('../Refl/src/refl.js')
+const Refl = require('../Refl/src/refl')
 
+Refl.mode(Refl.DEBUG)
 Refl.app('SampleApp').then(app => {
-  app.router.pipeline('default', [])
-  app.router.scope(scope => {
-    scope.pipeThrough('default')
-    scope.get('/home', conn => {
-      return conn.json({ hello: "world" })
-    })
-  })
+  app.load(require.resolve('./router'))
+}).catch(err => {
+  console.log(err.stack)
 })

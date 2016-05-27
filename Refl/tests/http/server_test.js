@@ -62,14 +62,18 @@ describe('HTTPServer specs', () => {
         })
     })
 
-    it('specifies the response status stored in the conn', () => {
+    it('reponds with status stored in the conn', () => {
       router.scope(scope => {
         scope.get('/home', conn => {
           return conn.status(280)
         })
       })
 
-      // let conn = Conn.mockConn('GET', '/home')
+      let conn = Conn.mockConn('GET', '/home')
+      return server.handleRequest(conn.req, conn.res)
+        .then(arg => {
+          expect(conn.res.statusCode).to.eq(280)
+        })
     })
   })
 })

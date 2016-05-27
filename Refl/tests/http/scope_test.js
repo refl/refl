@@ -223,6 +223,20 @@ describe('Scope specs', () => {
         })
     })
 
-    it('calls the parents scope pipeline prior to the nested pipeline')
+    it('calls the parents scope pipeline prior to the nested pipeline', () => {
+      let step1 = conn => { return conn.set('num', conn.get('num') + 3) }
+      let step2 = conn => { return conn.set('num', conn.get('num') * 2) }
+      scope.pipeThrough([step1])
+      scope.group(scope => {
+        scope.pipeThrough([step2])
+        scope.get('/home', conn => { return conn })
+      })
+
+      let conn = Conn.mockConn('GET', '/home').set('num', 1)
+      return router.dispatch(conn)
+        .then(conn => {
+          expect(conn.get('num')).to.eq((1 + 3) * 2)
+        })
+    })
   })
 })

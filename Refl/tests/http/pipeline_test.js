@@ -78,8 +78,25 @@ describe('Pipeline specs', () => {
         })
     })
 
-    it('rejects the promise if a step rejects')
-    it('doesnt call the next step if a step rejects')
+    it('rejects the promise if a step rejects', () => {
+      let step1 = conn => { return Promise.reject("nope") }
+      let pipeline = new Pipeline("sample", [step1])
+      return pipeline.invoke()
+        .catch(err => {
+          expect(err).to.match(/nope/)
+        })
+    })
+
+    it('doesnt call the next step if a step rejects', () => {
+      let step1 = sinon.spy(conn => { return Promise.reject('nope') })
+      let step2 = sinon.spy(conn => { return conn })
+      let pipeline = new Pipeline("sample", [step1, step2])
+      return pipeline.invoke()
+        .catch(err => {
+          expect(step1.called).to.be.true
+          expect(step2.called).to.be.false
+        })
+    })
   })
 
   describe('#wrap', () => {

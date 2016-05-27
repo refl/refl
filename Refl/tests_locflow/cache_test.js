@@ -12,7 +12,7 @@ describe('Cache specs', () => {
     // TODO: Create a separated test for `has` ?
     expect(Cache.has('name')).to.be.true
     expect(Cache.get('name')).to.eq('Luiz')
-    expect(Cache.has('somethign')).to.be.false
+    expect(Cache.has('something')).to.be.false
     expect(Cache.get('something')).to.be.undefined
   })
 

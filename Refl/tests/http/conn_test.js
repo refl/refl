@@ -140,6 +140,35 @@ describe('Conn specs', () => {
     })
   })
 
+  describe('#set and #get', () => {
+    let conn
+    beforeEach(() => { conn = Conn.mockConn('GET', '/home') })
+
+    it('stores the given value with set', () => {
+      expect(conn.set('name', 'Luiz')).to.be.ok // strings
+      expect(conn.set('age', 10)).to.be.ok      // numbers
+      expect(conn.set('my-key', {})).to.be.ok   // objects
+    })
+
+    it('returns a reference to the conn when storing values (chain)', () => {
+      expect(conn.set('name', 'Luiz')).to.eq(conn)
+      conn.set('name', 'Luiz').set('age', 10).set('my-key', {}) // chainning
+    })
+
+    it('retreives existing values with get', () => {
+      expect(conn.get('name')).to.be.undefined
+      conn.set('name', 'Luiz')
+      expect(conn.get('name')).to.eq('Luiz')
+    })
+
+    it('updates existing values with set', () => {
+      conn.set('name', 'Paulo')
+      expect(conn.get('name')).to.eq('Paulo')
+      conn.set('name', 'Luiz')
+      expect(conn.get('name')).to.eq('Luiz')
+    })
+  })
+
   describe('events', () => {
     it('registers a callback with the `on` function')
     it('calls the `beforeSend` callback before the conn sends')

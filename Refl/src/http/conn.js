@@ -15,6 +15,7 @@ class Conn extends EventEmitter {
     this.method     = req.method
     this.path       = this.url.path
     this.query      = this.url.queryObject()
+    this.values     = {}
   }
 
   /*
@@ -42,6 +43,25 @@ class Conn extends EventEmitter {
   status(statusCode) {
     this.statusCode = statusCode
     return this
+  }
+
+  /*
+  ** Stores the given `value` assocaited with `key`. Storing values in the conn
+  ** is the easier (and recommended) way to pass values from a pipeline step
+  ** other steps and the final handler. The internal data structure is a
+  ** object.
+  */
+  set(key, value) {
+    this.values[key] = value
+    return this
+  }
+  
+  /*
+  ** Retreives the value associated with `key`. `undefined` is returned if the
+  ** key doesn't exist.
+  */
+  get(key) {
+    return this.values[key]
   }
 
   /*

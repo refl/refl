@@ -1,8 +1,9 @@
 'use strict'
 
-const File = require('./file/file').File
-const Registry = require('./app/registry')
-const _ = require('lodash')
+const File           = require('./file/file').File
+const Registry       = require('./app/registry')
+const AppInitializer = require('./app/initializer')
+const _              = require('lodash')
 
 /*
 ** Refl's public API should be defined in this object. Everything not accessable
@@ -17,7 +18,15 @@ Refl.executionMode = Refl.PRODUCTION
 /*
 ** Public funciton to initialize an app.
 */
-Refl.app = require('./app/initializer').initializeApp
+Refl.app = function(appName, config) {
+  if(config) {
+    // The user is defining an app
+    return AppInitializer.initializeApp(appName, config)
+  } else {
+    // The user wants to retreive an app
+    return AppInitializer.getApp(appName)
+  }
+}
 
 /*
 ** Here is a little gotcha: although Refl works with 'multiple' applications
@@ -39,17 +48,8 @@ Refl.prepareInteraction = function(opts) {
     opts.router.reset()
     for(let script in Registry.getEntryScripts()) {
       let app = Registry.getApp(script)
-      try {
-        let entryFunction = require(script)
-        if(_.isFunction(entryFunction)) entryFunction(app)
-      } catch(e) {
-        // This error will be compilation related, such as invalid syntax or 
-        // requiring a non-existing module. We still need to display a nice
-        // HTML page.
-        console.log("++++++++++++++++++++")
-        console.log(e.stack)
-        throw e
-      }
+      let entryFunction = require(script)
+      if(_.isFunction(entryFunction)) entryFunction(app)
     }
   }
 }

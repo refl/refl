@@ -5,6 +5,7 @@ const Scope  = require('../../src/http/scope').Scope
 const Router = require('../../src/http/router').Router
 const sinon  = require('sinon')
 const Conn   = require('../../src/http/conn').Conn
+const App    = require('../../src/app/app').App
 const _      = require('lodash')
 
 
@@ -166,6 +167,31 @@ describe('Scope specs', () => {
         .then(arg => {
           expect(handler.called).to.be.true
         })
+    })
+
+    it('registers a route with an action string', () => {
+      let app = new App('MyApp')
+      router.app = app
+      app.controller('PagesController', {
+        home: conn => { return conn.set("hello", "world") }
+      })
+      scope.get('/home', 'PagesController@home')
+      return router.dispatch(Conn.mockConn('GET', '/home'))
+        .then(conn => {
+          expect(conn.get('hello')).to.eq('world')
+        })
+    })
+
+    it('throws an error if the given action string wasnt found', () => {
+      let app = new App('MyApp')
+      router.app = app
+      let registerRoute = () => { scope.get('/home', 'PagesController@home') }
+      expect(registerRoute).to.throw(/not found/)
+    })
+
+    it('throws an error if the handler isnt a function or action', () => {
+      let registerRoute = () => { scope.get('/home', null) }
+      expect(registerRoute).to.throw(/handler must be either a function or an action/)
     })
 
     it('returns a promise that resolves with the return value from the handler', () => {

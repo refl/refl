@@ -11,6 +11,12 @@ describe('Router specs', () => {
     expect(new Router()).to.be.ok
   })
 
+  it('stores a reference to the app it belongs', () => {
+    let app = {} // mocked app, doesn't really matter
+    let router = new Router(app)
+    expect(router.app).to.eq(app)
+  })
+
   describe('pipeline', () => {
     let router = null
     beforeEach(() => { router = new Router() })

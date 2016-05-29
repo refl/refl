@@ -7,8 +7,9 @@ const Pipeline     = require('./pipeline').Pipeline
 const Dispatcher   = require('./dispatcher').Dispatcher
 
 class Router extends EventEmitter {
-  constructor() {
+  constructor(app) {
     super()
+    this.app        = app
     this.pipelines  = {}
     this.dispatcher = new Dispatcher()
     this.dispatch   = this.dispatcher.dispatch.bind(this.dispatcher)

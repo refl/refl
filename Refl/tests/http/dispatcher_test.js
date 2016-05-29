@@ -51,7 +51,7 @@ describe('Dispatcher specs', () => {
       expect(handler.called).to.be.true
     })
 
-    it('calls the handler with named params', () => {
+    it('stores path params in the pathParams object', () => {
       let handler = (conn) => {
         expect(conn.pathParams).to.eql({ id: '10' })
       }
@@ -59,13 +59,21 @@ describe('Dispatcher specs', () => {
       dispatcher.dispatch(Conn.mockConn('GET', '/users/10'))
     })
 
-    it('calls the handler with multiple params', (done) => {
+    it('store path params for multiple attributes', (done) => {
       let handler = (conn) => {
         expect(conn.pathParams).to.eql({ user_id: '10', comment_id: '15' })
         done()
       }
       dispatcher.match('GET', '/users/:user_id/comments/:comment_id', handler)
       dispatcher.dispatch(Conn.mockConn('GET', '/users/10/comments/15'))
+    })
+
+    it('merges path params in the params hash', () => {
+      let handler = conn => {
+        expect(conn.params).to.eql({id: '10', color: 'blue'})
+      }
+      dispatcher.match('GET', '/users/:id', handler)
+      dispatcher.dispatch(Conn.mockConn('GET', '/users/10?color=blue'))
     })
 
     it('raises an error if multiple params have the same name', () => {
@@ -90,6 +98,7 @@ describe('Dispatcher specs', () => {
       return dispatcher.dispatch(conn)
         .catch(err => {
           expect(conn.statusCode).to.eq(404)
+          expect(err).to.match(/route not found/)
         })
     })
   })

@@ -27,6 +27,10 @@ exports.initializeApp = function initializeApp(appName, config) {
   return app.initialize()
 }
 
+exports.getApp = function getApp(appName) {
+  return apps[appName]
+}
+
 /*
 ** Removes all apps defined using the `initializeApp` function
 */

@@ -34,7 +34,18 @@ File.requireUncached = (module) => {
 ** Removes scripts from the `require` cache.
 */
 File.clearAppsRequireCache = function() {
+
+  // The following code identifies the current script path to find the Refl
+  // project path. When we delete things from cache, we should keep all
+  // Refl modules so we don't lose any internal data and configuration.
+  let currentScript = __filename
+  let reflPrefix = currentScript.substr(0, currentScript.indexOf('/src/file/file.js'))
+
   for(let moduleName in require.cache) {
+
+    // if it's a module inside Refl, we keep it on the cache.
+    if(moduleName.startsWith(reflPrefix)) continue
+
     delete require.cache[moduleName]
   }
 }
@@ -65,6 +76,11 @@ File.requireAll = (dir) => {
   })
 }
 
+/*
+** Scans the given directory listing all files in it. `ls` returns a promise
+** that resolves to an array of relative file paths. If you want an array of
+** absolute file paths see the function `lsResolve`.
+*/
 File.ls = (path) => {
   return new Promise((resolve, reject) => {
     fs.readdir(path, (err, files) => {
@@ -72,6 +88,19 @@ File.ls = (path) => {
       resolve(files)
     })
   })
+}
+
+/*
+** Similar to `ls`, but the array of files returned are absolute paths.
+*/
+File.lsResolve = (dir) => {
+  return File.ls(dir)
+    .then(files => {
+      return files.map(file => {
+        // TODO: maybe require.resolve isn't the best function here?
+        return require.resolve(path.join(dir, file))
+      })
+    })
 }
 
 /*

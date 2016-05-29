@@ -88,11 +88,12 @@ class Dispatcher extends EventEmitter {
           params[param] = lastMatch[index + 1]
         })
       }
-      conn.pathParams = params
+      conn.pathParams = params // Store in a different attribute just in case.
+      conn.mergeParams(params)
       return route.handler(conn)
     } else {
       return new Promise((resolve, reject) => {
-        conn.notFound(routeNotFoundError)
+        conn.notFound(new Error("route not found for [" + method + " '" + path + "']"))
       })
     }
   }

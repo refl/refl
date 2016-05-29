@@ -78,6 +78,17 @@ class Scope {
     if(!this._router) {
       throw new Error("No router associated with scope")
     }
+
+    if(_.isString(handler)) {
+      // The user specified an action string (PostsController@index). We need
+      // to search the method associated with the action
+      handler = this._router.app.action(handler)
+    } else if(_.isFunction(handler)) {
+      // nothing to do here :)
+    } else {
+      throw new Error("route handler must be either a function or an action")
+    }
+
     // The wrap function returns a new function that invokes the given pipelines
     // prior to the user handler.
     handler = Pipeline.wrap(this._pipelines, handler)
@@ -102,6 +113,12 @@ class Scope {
 
   delete(path, handler) {
     return this.match(Dispatcher.methodDELETE, path, handler)
+  }
+
+  resources(path, controller) {
+    this.get(path, controller.index)
+    this.get(path + '/create', controller.create)
+    this.post(path, controller.store)
   }
 }
 

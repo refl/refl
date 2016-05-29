@@ -83,6 +83,11 @@ describe('Conn specs', () => {
       })
     })
 
+    it('merges query params in the params hash', () => {
+      let conn = Conn.mockConn('GET', '/home?name=luiz')
+      expect(conn.params).to.eql({name: 'luiz'})
+    })
+
     // This test is in here because it calls `buildConn` internally and we're
     // testing a buildConn behaviour. Maybe change later.
     it('has a default status of 200', () => {
@@ -166,6 +171,28 @@ describe('Conn specs', () => {
       expect(conn.get('name')).to.eq('Paulo')
       conn.set('name', 'Luiz')
       expect(conn.get('name')).to.eq('Luiz')
+    })
+  })
+
+  describe('#mergeParams', () => {
+    it('starts with an empty params object', () => {
+      let conn = Conn.mockConn('GET', '/home')
+      expect(conn.params).to.eql({})
+    })
+
+    it('inserts the given object in the params hash', () => {
+      let conn = Conn.mockConn('GET', '/home')
+      let paramsRef = conn.params
+      conn.mergeParams({hello: "world"})
+      expect(conn.params).to.eql({hello: "world"})
+      expect(paramsRef).to.eql({hello: "world"}) // make sure we're actually modifying the object
+    })
+
+    it('overrides existing params', () => {
+      let conn = Conn.mockConn('GET', '/home')
+      conn.mergeParams({color: "red"})
+      conn.mergeParams({color: "blue"})
+      expect(conn.params).to.eql({color: "blue"})
     })
   })
 

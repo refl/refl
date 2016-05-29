@@ -33,11 +33,26 @@ describe('File specs', () => {
         })
     })
 
-    it('rejects the promise if the directory doesnt exist', (done) => {
+    it('rejects the promise if the directory doesnt exist', () => {
       File.ls('/tmp/kittens/')
         .catch(err => {
           expect(err).to.be.ok
-          done()
+        })
+    })
+  })
+
+  describe('.lsResolve', () => {
+    it('lists all files in a directory', () => {
+      return File.lsResolve(__dirname)
+        .then(files => {
+          expect(files).to.include(__filename)
+        })
+    })
+
+    it('rejects the promise if the directory doesnt exist', () => {
+      File.lsResolve('/tmp/kittens/')
+        .catch(err => {
+          expect(err).to.be.ok
         })
     })
   })

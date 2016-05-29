@@ -14,8 +14,10 @@ class Conn extends EventEmitter {
     this.statusCode = 200
     this.method     = req.method
     this.path       = this.url.path
-    this.query      = this.url.queryObject()
+    this.query      = this.url.queryObject(true)
     this.values     = {}
+    this.params     = this.query
+    this.pathParams = null // This property will be set by the dispatcher once it figures it out.
   }
 
   /*
@@ -62,6 +64,18 @@ class Conn extends EventEmitter {
   */
   get(key) {
     return this.values[key]
+  }
+
+  /*
+  ** There is a reasoning behind this method. We ideally want to abstract
+  ** from the user the 'source' of every paramemeter. If its coming from the
+  ** query string, url-encoded or json body or even path params. Everything 
+  ** should be accessible from the `params` object.
+  */
+  mergeParams(params) {
+    for(let key in params) {
+      this.params[key] = params[key]
+    }
   }
 
   /*

@@ -15,16 +15,16 @@ describe('initializer specs', () => {
     })
     
     it('returns a promise that resolves with the app with the given name', () => {
-      return Initializer.initializeApp('MyApp')
+      return Initializer.initializeApp('MyApp', {})
         .then(app => {
           expect(app.name).to.eq('MyApp')
         })
     })
 
     it('rejects the promise if the app name already exists', () => {
-      return Initializer.initializeApp('MyApp')
+      return Initializer.initializeApp('MyApp', {})
         .then(app => {
-          return Initializer.initializeApp('MyApp')
+          return Initializer.initializeApp('MyApp', {})
         })
         .catch(err => {
           expect(err).to.match(/already exists/)
@@ -32,36 +32,28 @@ describe('initializer specs', () => {
     })
 
     it('has a router object', () => {
-      return Initializer.initializeApp('MyApp')
+      return Initializer.initializeApp('MyApp', {})
         .then(app => {
           expect(app.router).to.be.ok
         })
     })
   })
 
-  describe('.load', () => {
+  describe('.getApp', () => {
     beforeEach(() => {
       return Initializer.clearAllApps()
     })
 
-    it('stores a reference to the entry script in the refl object', () => {
-      return Initializer.initializeApp('MyApp')
+    it('returns the app with the given name', () => {
+      return Initializer.initializeApp('MyApp', {})
         .then(app => {
-          expect(Registry.countEntries()).to.eq(0)
-          app.load(require.resolve('../resources/app1.js'))
-          expect(Registry.countEntries()).to.eq(1)
-          expect(Registry.getApp(require.resolve('../resources/app1.js'))).to.eq(app)
+          expect(Initializer.getApp('MyApp')).to.eq(app)
         })
     })
 
-    it('throws an error if entry script doesnt export a function', () => {
-      return Initializer.initializeApp('MyApp')
-        .then(app => {
-          app.load(require.resolve('../resources/app2.js'))
-        })
-        .catch(err => {
-          expect(err).to.match(/exported as a function/)
-        })
+    it('returns undefined if the app doesnt exists', () => {
+      expect(Initializer.getApp('CatApp')).to.be.undefined
     })
   })
+
 })

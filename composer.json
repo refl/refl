@@ -1,0 +1,26 @@
+{
+    "name": "refl/refl",
+    "description": "Complete web development suite",
+    "type": "framework",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Luiz Paulo",
+            "email": "luizpvasc@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "illuminate/support": "5.3.*",
+        "illuminate/database": "^5.3",
+        "illuminate/events": "^5.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "5.5.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Refl\\": "src"
+        }
+    }
+}

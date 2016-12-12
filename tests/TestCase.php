@@ -2,10 +2,13 @@
 
 use Illuminate\Database\Capsule\Manager as Capsule;
 
-abstract class TestCase extends PHPUnit_Framework_TestCase
+abstract class TestCase extends Illuminate\Foundation\Testing\TestCase
 {
+    protected $baseUrl = 'http://localhost';
+
     public function setUp()
     {
+        parent::setUp();
         $this->setupDatabase();
         $this->migrateTables();
     }
@@ -32,6 +35,12 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
             $table->text('body');
             $table->timestamps();
         });
+    }
+
+    public function createApplication()
+    {
+        $app = require __DIR__.'/../bootstrap/app.php';
+        return $app;
     }
 }
 

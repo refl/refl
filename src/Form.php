@@ -9,7 +9,12 @@ class Form {
     const InputNumber = 'input_number';
     const InputText   = 'input_text';
 
-    public static function getInputType($field) {
+    /**
+     * Returns the form input type for the given field. The input type is
+     * guessed from the name of the field. For example, the field "release_date",
+     * is guessed to be of the type date picker.
+     */
+    public static function guessInputType(string $field) {
         if(ends_with($field, '_at') || ends_with($field, '_date')) {
             return Form::DatePicker;
         }

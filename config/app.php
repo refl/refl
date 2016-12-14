@@ -167,7 +167,7 @@ return [
          * Package Service Providers...
          */
 
-        //
+        Refl\ReflServiceProvider::class,
 
         /*
          * Application Service Providers...

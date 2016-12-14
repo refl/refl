@@ -43,8 +43,3 @@ abstract class TestCase extends Illuminate\Foundation\Testing\TestCase
         return $app;
     }
 }
-
-class Post extends Refl\Resource
-{
-    protected $fields = ['title', 'body'];
-}

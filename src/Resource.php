@@ -25,11 +25,20 @@ class Resource extends Model
         $this->fillable = $this->fields;
     }
 
-    public static function routes()
+    /**
+     * Returns the URL name for this resource. The logic is pretty simple: it
+     * snake_cases and plurilizes the class name. For example, for the resource
+     * "Post", the url name would be "posts".
+     *
+     * @return string The name of the restful routes.
+     */
+    public function getRouteName()
     {
-        $className = Str::snake(Str::plural(get_called_class()));
-        $resourceName = str_replace('\\', '', $className);
-        $routes = [0,1,2,3,4,5,6];
-        return $routes;
+        return 'posts';
+    }
+
+    public function getIndexQuery()
+    {
+        return self::orderBy('created_at', 'DESC');
     }
 }

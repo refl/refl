@@ -1,19 +1,21 @@
 <?php
 
-use Refl\RestfulController;
+use App\Resources\Post;
 
 class RestfulControllerTest extends TestCase
 {
-    protected $controller;
-
-    public function setUp()
+    private function makePost($title)
     {
-        parent::setUp();
-        $this->controller = new RestfulController(['resource' => Post::class]);
+        $post = Post::create(['title' => $title, 'body' => 'Here is the post body']);
     }
 
     public function test_index()
     {
-        // $this->visit('/posts')->see('Posts index');
+        $this->makePost('The PHP language');
+        $this->makePost('The Ruby language');
+
+        $this->visit('/posts')
+             ->see('The PHP language')
+             ->see('The Ruby language');
     }
 }

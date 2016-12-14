@@ -13,6 +13,9 @@ class Form {
      * Returns the form input type for the given field. The input type is
      * guessed from the name of the field. For example, the field "release_date",
      * is guessed to be of the type date picker.
+     *
+     * @param string $field Name of the field
+     * @return string Name of the input type for the given field.
      */
     public static function guessInputType(string $field) {
         if(ends_with($field, '_at') || ends_with($field, '_date')) {
